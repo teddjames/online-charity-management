@@ -1,0 +1,60 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment variables
+.env
+*.env
+
+# Flask & gunicorn logs
+*.log
+instance/
+*.pid
+
+# SQLite (if used temporarily)
+*.sqlite3
+
+# Pyenv
+.python-version
+
+# Virtual environments
+venv/
+.venv/
+ENV/
+env/
+env.bak/
+venv.bak/
+
+# pipenv
+Pipfile.lock
+
+# macOS
+.DS_Store
+
+# VSCode
+.vscode/
+
+# Migrations (optional - if you want to regenerate)
+# Comment this out if you want to keep migration history in version control
+# migrations/
+
+# Alembic cache
+alembic.ini
+
+# Pytest / coverage
+.coverage
+htmlcov/
+.tox/
+.nox/
+.cache/
+.pytest_cache/
+
+# MyPy
+.mypy_cache/
+
+# IDEs
+.idea/
+*.iml
+*.sublime-project
+*.sublime-workspace
