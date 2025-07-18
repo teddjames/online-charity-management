@@ -1,10 +1,12 @@
 from flask import Flask
 from dotenv import load_dotenv
 import os
+import marshmallow # Import marshmallow here
 
 # Load environment variables from .env file
 load_dotenv()
 
+# Import extensions and config
 from app.extensions import db, jwt, migrate
 from app.config import Config
 
@@ -18,24 +20,20 @@ def create_app():
     # Initialize extensions with the app
     db.init_app(app)
     jwt.init_app(app)
-    migrate.init_app(app,db)
+    migrate.init_app(app, db)
+
+    # --- ADD THIS DEBUG PRINT ---
+    print(f"DEBUG: Marshmallow version in app context: {marshmallow.__version__}")
+    # --- END DEBUG PRINT ---
 
     # Register Blueprints
     from app.routes.auth_routes import auth_bp
     from app.routes.user_routes import user_bp
+
     app.register_blueprint(auth_bp)
     app.register_blueprint(user_bp)
 
     # Import models so that SQLAlchemy knows about them
-    # This is important for db.create_all() to work correctly
-    from app.models.user import User
-    from app.models.ngo import NGOProfile
-    from app.models.donor import DonorProfile
-    #from app.models import ngo, donor, cause, donation # Will be imported later
-
-    # Create database tables if they don't exist
-    # In a production environment, you would use Flask-Migrate for migrations
-    # with app.app_context():
-    #     db.create_all()
+    from app.models import user, ngo, donor
 
     return app
