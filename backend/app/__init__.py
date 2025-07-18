@@ -27,7 +27,9 @@ def create_app():
     # Import models so that SQLAlchemy knows about them
     # This is important for db.create_all() to work correctly
     from app.models.user import User
-    # from app.models import ngo, donor, cause, donation # Will be imported later
+    from app.models.ngo import NGOProfile
+    from app.models.donor import DonorProfile
+    #from app.models import ngo, donor, cause, donation # Will be imported later
 
     # Create database tables if they don't exist
     # In a production environment, you would use Flask-Migrate for migrations
