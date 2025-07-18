@@ -20,7 +20,12 @@ class User(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
-   
+    # Relationships:
+    # One-to-one relationship with NGOProfile if the user is an NGO
+    ngo_profile = db.relationship('NGOProfile', backref='user', uselist=False, lazy=True, cascade="all, delete-orphan")
+    # One-to-one relationship with DonorProfile if the user is a Donor
+    donor_profile = db.relationship('DonorProfile', backref='user', uselist=False, lazy=True, cascade="all, delete-orphan")
+
     def set_password(self, password):
         """Hashes the password and stores it."""
         self.password_hash = generate_password_hash(password)
