@@ -22,7 +22,9 @@ def create_app():
 
     # Register Blueprints
     from app.routes.auth_routes import auth_bp
+    from app.routes.user_routes import user_bp
     app.register_blueprint(auth_bp)
+    app.register_blueprint(user_bp)
 
     # Import models so that SQLAlchemy knows about them
     # This is important for db.create_all() to work correctly
