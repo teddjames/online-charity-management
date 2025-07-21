@@ -71,7 +71,7 @@ def get_category_by_id(category_id):
 
 @admin_bp.route('/categories/<category_id>', methods=['PUT'])
 @jwt_required()
-@admin_required # Only admins can update categories
+@admin_required  # Only admins can update categories
 def update_category(category_id):
     """
     Updates an existing donation category by ID. Admin only.
@@ -86,20 +86,20 @@ def update_category(category_id):
         return jsonify({"message": "Invalid JSON"}), 400
 
     try:
-        # Load and validate data, updating the existing category instance
-        # partial=True allows sending only fields you want to update
-        updated_category_data = category_schema.load(data, instance=category, partial=True)
-        # Marshmallow's load with instance=category automatically updates the object
-        # but we iterate to ensure all fields are set (useful if not using instance directly)
-        for key, value in updated_category_data.items():
-            setattr(category, key, value)
-    except Exception as e:
-        return jsonify({"message": "Validation error", "errors": str(e)}), 400
+        # ✅ Validate data using schema (without instance=...)
+        validated_data = category_schema.load(data, partial=True)
+    except ValidationError as err:
+        return jsonify({"message": "Validation error", "errors": err.messages}), 400
 
-    # Check for duplicate name if name is being updated
-    if 'name' in data and data['name'] != category.name:
-        if Category.query.filter(Category.name == data['name'], Category.id != category_id).first():
-            return jsonify({"message": f"Category with name '{data['name']}' already exists"}), 409
+    # ✅ Check for duplicate name
+    if 'name' in validated_data and validated_data['name'] != category.name:
+        existing = Category.query.filter(Category.name == validated_data['name'], Category.id != category_id).first()
+        if existing:
+            return jsonify({"message": f"Category with name '{validated_data['name']}' already exists"}), 409
+
+    # ✅ Apply changes manually
+    for key, value in validated_data.items():
+        setattr(category, key, value)
 
     try:
         db.session.commit()
