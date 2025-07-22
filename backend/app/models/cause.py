@@ -16,7 +16,8 @@ class Category(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
     # Relationship to DonationRequest
-    donation_requests = db.relationship('DonationRequest', backref='category_obj', lazy=True, cascade="all, delete-orphan")
+    # Use back_populates to explicitly link to the 'category' relationship in DonationRequest
+    donation_requests = db.relationship('DonationRequest', back_populates='category', lazy=True, cascade="all, delete-orphan")
 
     def __repr__(self):
         return f'<Category {self.name}>'

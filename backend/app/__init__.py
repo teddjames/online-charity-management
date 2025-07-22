@@ -1,7 +1,7 @@
 from flask import Flask
 from dotenv import load_dotenv
 import os
-import marshmallow 
+import marshmallow
 
 # Load environment variables from .env file
 load_dotenv()
@@ -22,20 +22,20 @@ def create_app():
     jwt.init_app(app)
     migrate.init_app(app, db)
 
-    # --- ADD THIS DEBUG PRINT ---
     print(f"DEBUG: Marshmallow version in app context: {marshmallow.__version__}")
-    # --- END DEBUG PRINT ---
 
     # Register Blueprints
     from app.routes.auth_routes import auth_bp
     from app.routes.user_routes import user_bp
-    from app.routes.admin_routes import admin_bp  
-    from app.routes.ngo_routes import ngo_bp  
+    from app.routes.admin_routes import admin_bp
+    from app.routes.ngo_routes import ngo_bp
+    from app.routes.donor_routes import donor_bp 
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(user_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(ngo_bp)
+    app.register_blueprint(donor_bp) 
 
     # Import models so that SQLAlchemy knows about them
     from app.models import user, ngo, donor, cause, donation

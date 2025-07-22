@@ -93,18 +93,18 @@ def update_my_profile():
         # Create NGOProfile if it doesn't exist (e.g., if user registered as NGO but profile wasn't created yet)
         if not ngo_profile:
             print("DEBUG: PUT - Creating new NGOProfile.")
-            ngo_profile = NGOProfile(user_id=user_id, organization_name=data.get('ngo_profile', {}).get('organization_name', ''))
+            ngo_profile = NGOProfile(user_id=user_id, organization_name=data.get('ngo_profile', {}).get('organization_name', 'Default NGO Name'))
             db.session.add(ngo_profile)
 
         # Load and validate NGO profile data using schema
         ngo_profile_data = data.get('ngo_profile', {})
         print(f"DEBUG: PUT - NGO profile data from request: {ngo_profile_data}")
         try:
-            # Partial=True allows updating only specified fields
-            updated_ngo_profile_dict = ngo_profile_schema.load(ngo_profile_data, instance=ngo_profile, partial=True)
-            for key, value in updated_ngo_profile_dict.items():
+            # Load data without instance, then manually update the object
+            loaded_data = ngo_profile_schema.load(data=ngo_profile_data, partial=True)
+            for key, value in loaded_data.items():
                 setattr(ngo_profile, key, value)
-            print(f"DEBUG: PUT - NGO Profile loaded and updated via schema. Updated fields: {updated_ngo_profile_dict.keys()}")
+            print(f"DEBUG: PUT - NGO Profile loaded and updated via schema. Updated fields: {loaded_data.keys()}")
         except Exception as e:
             db.session.rollback()
             print(f"DEBUG: PUT - Error loading NGO profile data: {e}")
@@ -116,17 +116,18 @@ def update_my_profile():
         # Create DonorProfile if it doesn't exist
         if not donor_profile:
             print("DEBUG: PUT - Creating new DonorProfile.")
-            donor_profile = DonorProfile(user_id=user_id, first_name=data.get('donor_profile', {}).get('first_name', ''), last_name=data.get('donor_profile', {}).get('last_name', ''))
+            donor_profile = DonorProfile(user_id=user_id, first_name=data.get('donor_profile', {}).get('first_name', 'Default'), last_name=data.get('donor_profile', {}).get('last_name', 'Donor'))
             db.session.add(donor_profile)
 
         # Load and validate Donor profile data using schema
         donor_profile_data = data.get('donor_profile', {})
         print(f"DEBUG: PUT - Donor profile data from request: {donor_profile_data}")
         try:
-            updated_donor_profile_dict = donor_profile_schema.load(donor_profile_data, instance=donor_profile, partial=True)
-            for key, value in updated_donor_profile_dict.items():
+            # Load data without instance, then manually update the object
+            loaded_data = donor_profile_schema.load(data=donor_profile_data, partial=True)
+            for key, value in loaded_data.items():
                 setattr(donor_profile, key, value)
-            print(f"DEBUG: PUT - Donor Profile loaded and updated via schema. Updated fields: {updated_donor_profile_dict.keys()}")
+            print(f"DEBUG: PUT - Donor Profile loaded and updated via schema. Updated fields: {loaded_data.keys()}")
         except Exception as e:
             db.session.rollback()
             print(f"DEBUG: PUT - Error loading Donor profile data: {e}")
