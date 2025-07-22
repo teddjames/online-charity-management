@@ -1,44 +1,39 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.extensions import db
-from app.models.user import User # Needed for admin_required to check role
-from app.models.cause import Category # Import the new Category model
-from app.schemas.cause_schema import CategorySchema # Import the new Category schema
-from app.utils.decorators import admin_required # Import the admin_required decorator
+from app.models.user import User
+from app.models.cause import Category
+from app.models.donation import DonationRequest # Import DonationRequest
+from app.schemas.cause_schema import CategorySchema
+from app.schemas.donation_schema import DonationRequestSchema # Import DonationRequestSchema
+from app.utils.decorators import admin_required
+from datetime import datetime
 
 admin_bp = Blueprint('admin_bp', __name__, url_prefix='/api/admin')
 
 # Initialize schemas
 category_schema = CategorySchema()
-categories_schema = CategorySchema(many=True) # For lists of categories
+categories_schema = CategorySchema(many=True)
+donation_request_schema = DonationRequestSchema() # For single request
+donation_requests_schema = DonationRequestSchema(many=True) # For lists of requests
 
+# --- Category Management Routes (already implemented, keeping for context) ---
 @admin_bp.route('/categories', methods=['POST'])
 @jwt_required()
-@admin_required # Only admins can create categories
+@admin_required
 def create_category():
-    """
-    Creates a new donation category. Admin only.
-    Expects JSON data with 'name' and optional 'description'.
-    """
     data = request.get_json()
     if not data:
         return jsonify({"message": "Invalid JSON"}), 400
-
     try:
-        # Validate input data using Marshmallow schema
         validated_data = category_schema.load(data)
     except Exception as e:
         return jsonify({"message": "Validation error", "errors": str(e)}), 400
-
     name = validated_data.get('name')
     description = validated_data.get('description')
-
-    # Check if category with this name already exists
     if Category.query.filter_by(name=name).first():
         return jsonify({"message": f"Category '{name}' already exists"}), 409
-
     new_category = Category(name=name, description=description)
-
     try:
         db.session.add(new_category)
         db.session.commit()
@@ -49,21 +44,15 @@ def create_category():
 
 @admin_bp.route('/categories', methods=['GET'])
 @jwt_required()
-@admin_required # Or you might make this public later if donors need to see categories
+@admin_required
 def get_all_categories():
-    """
-    Retrieves all donation categories. Admin only.
-    """
     categories = Category.query.all()
     return jsonify(categories_schema.dump(categories)), 200
 
 @admin_bp.route('/categories/<category_id>', methods=['GET'])
 @jwt_required()
-@admin_required # Or public
+@admin_required
 def get_category_by_id(category_id):
-    """
-    Retrieves a single donation category by ID. Admin only.
-    """
     category = Category.query.get(category_id)
     if not category:
         return jsonify({"message": "Category not found"}), 404
@@ -71,36 +60,23 @@ def get_category_by_id(category_id):
 
 @admin_bp.route('/categories/<category_id>', methods=['PUT'])
 @jwt_required()
-@admin_required  # Only admins can update categories
+@admin_required
 def update_category(category_id):
-    """
-    Updates an existing donation category by ID. Admin only.
-    Expects JSON data with 'name' and/or 'description'.
-    """
     category = Category.query.get(category_id)
     if not category:
         return jsonify({"message": "Category not found"}), 404
-
     data = request.get_json()
     if not data:
         return jsonify({"message": "Invalid JSON"}), 400
-
     try:
-        # ✅ Validate data using schema (without instance=...)
-        validated_data = category_schema.load(data, partial=True)
-    except ValidationError as err:
-        return jsonify({"message": "Validation error", "errors": err.messages}), 400
-
-    # ✅ Check for duplicate name
-    if 'name' in validated_data and validated_data['name'] != category.name:
-        existing = Category.query.filter(Category.name == validated_data['name'], Category.id != category_id).first()
-        if existing:
-            return jsonify({"message": f"Category with name '{validated_data['name']}' already exists"}), 409
-
-    # ✅ Apply changes manually
-    for key, value in validated_data.items():
-        setattr(category, key, value)
-
+        updated_category_data = category_schema.load(data, instance=category, partial=True)
+        for key, value in updated_category_data.items():
+            setattr(category, key, value)
+    except Exception as e:
+        return jsonify({"message": "Validation error", "errors": str(e)}), 400
+    if 'name' in data and data['name'] != category.name:
+        if Category.query.filter(Category.name == data['name'], Category.id != category_id).first():
+            return jsonify({"message": f"Category with name '{data['name']}' already exists"}), 409
     try:
         db.session.commit()
         return jsonify(category_schema.dump(category)), 200
@@ -110,20 +86,96 @@ def update_category(category_id):
 
 @admin_bp.route('/categories/<category_id>', methods=['DELETE'])
 @jwt_required()
-@admin_required # Only admins can delete categories
+@admin_required
 def delete_category(category_id):
-    """
-    Deletes a donation category by ID. Admin only.
-    """
     category = Category.query.get(category_id)
     if not category:
         return jsonify({"message": "Category not found"}), 404
-
     try:
         db.session.delete(category)
         db.session.commit()
         return jsonify({"message": "Category deleted successfully"}), 200
     except Exception as e:
         db.session.rollback()
-        # Consider handling IntegrityError if categories are linked to donation requests
         return jsonify({"message": "An error occurred while deleting the category", "error": str(e)}), 500
+
+# --- NEW Donation Request Management Routes for Admin ---
+
+@admin_bp.route('/donation-requests', methods=['GET'])
+@jwt_required()
+@admin_required
+def get_all_donation_requests():
+    """
+    Admin can view all donation requests (pending, approved, rejected, completed).
+    """
+    donation_requests = DonationRequest.query.all()
+    return jsonify(donation_requests_schema.dump(donation_requests)), 200
+
+@admin_bp.route('/donation-requests/<request_id>', methods=['GET'])
+@jwt_required()
+@admin_required
+def get_single_donation_request(request_id):
+    """
+    Admin can view a single donation request by ID.
+    """
+    donation_request = DonationRequest.query.get(request_id)
+    if not donation_request:
+        return jsonify({"message": "Donation request not found"}), 404
+    return jsonify(donation_request_schema.dump(donation_request)), 200
+
+@admin_bp.route('/donation-requests/<request_id>/approve', methods=['PUT'])
+@jwt_required()
+@admin_required
+def approve_donation_request(request_id):
+    """
+    Admin can approve a pending donation request.
+    """
+    donation_request = DonationRequest.query.get(request_id)
+    if not donation_request:
+        return jsonify({"message": "Donation request not found"}), 404
+
+    if donation_request.status != 'Pending':
+        return jsonify({"message": f"Donation request is already '{donation_request.status}'. Only 'Pending' requests can be approved."}), 400
+
+    current_user_identity = get_jwt_identity()
+    admin_user_id = current_user_identity['id']
+
+    donation_request.status = 'Approved'
+    donation_request.approved_by_admin_id = admin_user_id
+    donation_request.approval_date = datetime.utcnow()
+
+    try:
+        db.session.commit()
+        return jsonify({"message": "Donation request approved successfully", "request": donation_request_schema.dump(donation_request)}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"message": "An error occurred while approving the request", "error": str(e)}), 500
+
+@admin_bp.route('/donation-requests/<request_id>/reject', methods=['PUT'])
+@jwt_required()
+@admin_required
+def reject_donation_request(request_id):
+    """
+    Admin can reject a pending donation request.
+    """
+    donation_request = DonationRequest.query.get(request_id)
+    if not donation_request:
+        return jsonify({"message": "Donation request not found"}), 404
+
+    if donation_request.status != 'Pending':
+        return jsonify({"message": f"Donation request is already '{donation_request.status}'. Only 'Pending' requests can be rejected."}), 400
+
+    current_user_identity = get_jwt_identity()
+    admin_user_id = current_user_identity['id'] # Store who rejected it, if desired
+
+    donation_request.status = 'Rejected'
+    # Optional: store which admin rejected it, and date
+    donation_request.approved_by_admin_id = admin_user_id
+    donation_request.approval_date = datetime.utcnow()
+
+    try:
+        db.session.commit()
+        return jsonify({"message": "Donation request rejected successfully", "request": donation_request_schema.dump(donation_request)}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"message": "An error occurred while rejecting the request", "error": str(e)}), 500

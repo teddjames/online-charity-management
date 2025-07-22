@@ -29,13 +29,15 @@ def create_app():
     # Register Blueprints
     from app.routes.auth_routes import auth_bp
     from app.routes.user_routes import user_bp
-    from app.routes.admin_routes import admin_bp    
+    from app.routes.admin_routes import admin_bp  
+    from app.routes.ngo_routes import ngo_bp  
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(user_bp)
     app.register_blueprint(admin_bp)
+    app.register_blueprint(ngo_bp)
 
     # Import models so that SQLAlchemy knows about them
-    from app.models import user, ngo, donor, cause
+    from app.models import user, ngo, donor, cause, donation
 
     return app
