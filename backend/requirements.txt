@@ -5,3 +5,4 @@ psycopg2-binary
 Werkzeug==2.3.7
 python-dotenv==1.0.0
 Flask-Migrate==4.0.0
+cloudinary==1.38.0
