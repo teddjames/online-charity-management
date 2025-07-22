@@ -12,6 +12,7 @@ werkzeug = "==2.3.7"
 python-dotenv = "==1.0.0"
 flask-migrate = "==4.0.0"
 marshmallow = "==3.21.0"
+cloudinary = "==1.38.0"
 
 [dev-packages]
 
