@@ -15,8 +15,8 @@ class Category(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
-    
-    donation_requests = db.relationship('DonationRequest', backref='category', lazy=True)
+    # Relationship to DonationRequest
+    donation_requests = db.relationship('DonationRequest', backref='category_obj', lazy=True, cascade="all, delete-orphan")
 
     def __repr__(self):
         return f'<Category {self.name}>'

@@ -26,8 +26,8 @@ class DonationRequest(db.Model):
     approval_date = db.Column(db.DateTime, nullable=True)
 
     # Relationships
-    ngo = db.relationship('NGOProfile', backref='donation_requests', lazy=True)
-    category = db.relationship('Category', backref='donation_requests', lazy=True)
+    ngo = db.relationship('NGOProfile', backref='ngo_donations', lazy=True)
+    category = db.relationship('Category', backref='category_donations', lazy=True)
     approved_by = db.relationship('User', backref='approved_requests', lazy=True) # Link to User (Admin) who approved
 
     def __repr__(self):
