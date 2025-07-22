@@ -21,5 +21,8 @@ class NGOProfile(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
+    # Relationship to DonationRequest
+    donation_requests = db.relationship('DonationRequest', backref='ngo_obj', lazy=True, cascade="all, delete-orphan")
+
     def __repr__(self):
         return f'<NGOProfile {self.organization_name}>'
