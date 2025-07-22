@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 import uuid
 from datetime import datetime
 from app.extensions import db
@@ -32,3 +33,5 @@ class DonationRequest(db.Model):
 
     def __repr__(self):
         return f'<DonationRequest {self.title} (Status: {self.status})>'
+=======
+>>>>>>> Stashed changes
