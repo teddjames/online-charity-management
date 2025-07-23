@@ -21,8 +21,9 @@ class NGOProfile(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
-    # Relationship to DonationRequest
-    donation_requests = db.relationship('DonationRequest', backref='ngo_obj', lazy=True, cascade="all, delete-orphan")
+    # Relationship to individual DonationRequest records
+    # Add overlaps to resolve SAWarning
+    donation_requests = db.relationship('DonationRequest', backref='ngo_obj', lazy=True, cascade="all, delete-orphan", overlaps="ngo_obj,ngo")
 
     def __repr__(self):
         return f'<NGOProfile {self.organization_name}>'

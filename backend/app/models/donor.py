@@ -16,5 +16,9 @@ class DonorProfile(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
+    # Relationship to individual Donation records
+    # Use back_populates to explicitly link to the 'donor' relationship in Donation
+    donations = db.relationship('Donation', back_populates='donor', lazy=True, cascade="all, delete-orphan")
+
     def __repr__(self):
         return f'<DonorProfile {self.first_name} {self.last_name}>'
