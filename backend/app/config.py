@@ -19,7 +19,7 @@ import os
 class Config:
         # Database configuration
         # Render will provide DATABASE_URL automatically for its PostgreSQL
-        SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'postgresql://charity_db_h2ej_user:MDjyLOIuliUqB8dUt8dQo5dpq5g5iNGZ@dpg-d208o97diees7397nuq0-a.oregon-postgres.render.com/charity_db_h2ej')
+        SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
         SQLALCHEMY_TRACK_MODIFICATIONS = False
 
         # JWT configuration
