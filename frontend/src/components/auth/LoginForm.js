@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { Heart, Mail, Lock } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
-// Main Login Page Component
 export default function LoginPage() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -19,9 +19,16 @@ export default function LoginPage() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Login logic will go here
-    console.log("Login attempt with:", formData);
-    alert(`Welcome back!`);
+
+    // Simulate a successful login (replace with real API later)
+    const user = {
+      email: formData.email,
+      role: "donor", // optional
+    };
+
+    localStorage.setItem("donor", JSON.stringify(user));
+    alert(`Welcome back, ${user.email}!`);
+    navigate("/donate/123"); // TODO: Replace 123 with actual causeId dynamically
   };
 
   const inputClass =
