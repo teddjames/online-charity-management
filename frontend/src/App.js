@@ -11,6 +11,7 @@ import NgoDashboard from './components/dashboard/NgoDashboard';
 import Navbar from './components/common/Navbar';
 import Footer from './components/common/Footer';
 import AboutUsPage from './pages/About';
+import DonatePage from "./pages/DonatePage";
 import ContactPage from './pages/Contact';
 
 function App() {
@@ -22,12 +23,13 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<LoginPage />} />
-            <Route path="/causes" element={<CausesPage />} /> 
+            <Route path="/causes" element={<CausesPage />} />
             <Route path="/about" element={<AboutUsPage />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/dashboard/donor" element={<DonorDashboard />} />
             <Route path="/dashboard/ngo" element={<NgoDashboard />} />
-            <Route path = "/contact" element = {<ContactPage/>}/>
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/donate/:causeId" element={<DonatePage />} />
             {/* Add other routes here as you build them */}
             {/* <Route path="/dashboard/admin" element={<AdminDashboard />} />
             <Route path="/causes" element={<CausesPage />} />
