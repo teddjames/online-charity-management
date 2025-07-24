@@ -53,11 +53,17 @@ def create_app():
     print(NGOProfile.__name__)
     print(DonorProfile.__name__)
 
-    # --- ADD THIS HEALTH CHECK ENDPOINT ---
+    # # --- ADD THIS HEALTH CHECK ENDPOINT ---
+    # @app.route('/health', methods=['GET'])
+    # def health_check():
+    #     return jsonify({"status": "ok", "message": "Service is healthy!"}), 200
+    # # --- END OF HEALTH CHECK ENDPOINT ---
+        # --- ADD THIS HEALTH CHECK ENDPOINT ---
     @app.route('/health', methods=['GET'])
     def health_check():
         return jsonify({"status": "ok", "message": "Service is healthy!"}), 200
     # --- END OF HEALTH CHECK ENDPOINT ---
+
 
     return app
 
