@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Heart, Search, HeartHandshake, BookOpen } from "lucide-react";
 
 // --- MOCK DATA ---
@@ -52,9 +52,8 @@ const StatCard = ({ icon, value, label }) => (
   </div>
 );
 
-// ✅ Updated CauseCard component
+// Cause card component
 const CauseCard = ({ cause }) => {
-  const navigate = useNavigate();
   const {
     id,
     title,
@@ -65,10 +64,6 @@ const CauseCard = ({ cause }) => {
     category,
   } = cause;
   const progress = (amount_received / amount_needed) * 100;
-
-  const handleDonateClick = () => {
-    navigate(`/donate/${id}`);
-  };
 
   return (
     <div className="bg-white rounded-2xl shadow-lg overflow-hidden transform hover:-translate-y-2 transition-transform duration-300 ease-in-out group">
@@ -101,18 +96,17 @@ const CauseCard = ({ cause }) => {
             ></div>
           </div>
         </div>
-        <button
-          onClick={handleDonateClick}
-          className="w-full bg-blue-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-600 transition-colors duration-300 group-hover:scale-105 transform"
-        >
-          Donate Now
-        </button>
+        <Link to={`/donate/${id}`}>
+          <button className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-300 group-hover:scale-105 transform">
+            Donate Now
+          </button>
+        </Link>
       </div>
     </div>
   );
 };
 
-// ✅ Main Home Component
+// HomePage component
 export default function HomePage() {
   return (
     <div className="bg-slate-50 font-sans">
@@ -129,10 +123,7 @@ export default function HomePage() {
                 "url('https://res.cloudinary.com/drurumfi8/image/upload/v1753340076/Dashboard_image_h5n2mk.png')",
             }}
           >
-            <span
-              id="blackOverlay"
-              className="w-full h-full absolute opacity-50 bg-black"
-            ></span>
+            <span className="w-full h-full absolute opacity-50 bg-black" />
           </div>
           <div className="container relative mx-auto">
             <div className="items-center flex flex-wrap">
@@ -146,9 +137,11 @@ export default function HomePage() {
                     support to those in need. Every contribution, big or small,
                     makes a lasting impact.
                   </p>
-                  <button className="mt-8 bg-blue-500 text-white font-bold py-4 px-8 rounded-full text-lg hover:bg-blue-600 transition-all duration-300 transform hover:scale-110 shadow-xl">
-                    Explore Causes
-                  </button>
+                  <Link to="/causes">
+                    <button className="mt-8 bg-blue-500 text-white font-bold py-4 px-8 rounded-full text-lg hover:bg-blue-600 transition-all duration-300 transform hover:scale-110 shadow-xl">
+                      Explore Causes
+                    </button>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -178,7 +171,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* How it Works Section */}
+        {/* How It Works Section */}
         <section className="py-20 bg-white">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
@@ -208,8 +201,8 @@ export default function HomePage() {
                   2. Donors Find a Cause
                 </h3>
                 <p className="text-gray-600">
-                  You can browse approved causes, filtering by category to find
-                  one that resonates with you.
+                  Browse approved causes, filtering by category to find one that
+                  resonates with you.
                 </p>
               </div>
               <div className="p-6">
@@ -245,9 +238,11 @@ export default function HomePage() {
               ))}
             </div>
             <div className="text-center mt-12">
-              <button className="bg-transparent border-2 border-blue-500 text-blue-500 font-bold py-3 px-8 rounded-lg hover:bg-blue-500 hover:text-white transition-colors duration-300">
-                View All Causes
-              </button>
+              <Link to="/causes">
+                <button className="bg-transparent border-2 border-blue-500 text-blue-500 font-bold py-3 px-8 rounded-lg hover:bg-blue-500 hover:text-white transition-colors duration-300">
+                  View All Causes
+                </button>
+              </Link>
             </div>
           </div>
         </section>
