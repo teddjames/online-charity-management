@@ -42,7 +42,7 @@ export default function LoginPage() {
         {/* Image Section */}
         <div className="hidden lg:block relative">
           <img
-            src="https://cdn.discordapp.com/attachments/1395611202104721448/1397273166983856269/9e502536-7068-4912-80e0-179e62827465.png?ex=68811f8b&is=687fce0b&hm=3446c7c112fd95d83785b85f2bf65760a59c24356acf217954b2c7e7326700e4&"
+            src="https://res.cloudinary.com/drurumfi8/image/upload/v1753340486/login_image_fweyzs.png"
             alt="Person logging into the platform securely"
             className="w-full h-full object-cover"
           />
