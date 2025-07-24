@@ -4,7 +4,7 @@ from app.extensions import db
 
 class DonorProfile(db.Model):
     """
-    DonorProfile model representing additional details for Donor users.
+    DonorProfile model representing  details for Donor users.
     """
     __tablename__ = 'donor_profiles'
 
