@@ -126,7 +126,7 @@ export default function HomePage() {
             className="absolute top-0 w-full h-full bg-center bg-cover"
             style={{
               backgroundImage:
-                "url('https://cdn.discordapp.com/attachments/1395611202104721448/1397272495526117426/93c31a9b-41cd-4fb5-a4ec-afbafcfec687.png')",
+                "url('https://res.cloudinary.com/drurumfi8/image/upload/v1753340076/Dashboard_image_h5n2mk.png')",
             }}
           >
             <span
