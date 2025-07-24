@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify
 from dotenv import load_dotenv
 import os
 import marshmallow
@@ -53,4 +53,11 @@ def create_app():
     print(NGOProfile.__name__)
     print(DonorProfile.__name__)
 
+    # --- ADD THIS HEALTH CHECK ENDPOINT ---
+    @app.route('/health', methods=['GET'])
+    def health_check():
+        return jsonify({"status": "ok", "message": "Service is healthy!"}), 200
+    # --- END OF HEALTH CHECK ENDPOINT ---
+
     return app
+
