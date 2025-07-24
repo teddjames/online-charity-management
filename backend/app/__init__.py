@@ -2,7 +2,7 @@ from flask import Flask
 from dotenv import load_dotenv
 import os
 import marshmallow
-
+from sqlalchemy import inspect
 # Load environment variables from .env file
 load_dotenv()
 
@@ -37,7 +37,20 @@ def create_app():
     app.register_blueprint(ngo_bp)
     app.register_blueprint(donor_bp) 
 
-    # Import models so that SQLAlchemy knows about them
     from app.models import user, ngo, donor, cause, donation
+    from app.models.user import User
+    from app.models.ngo import NGOProfile
+    from app.models.donor import DonorProfile
+    from app.models.cause import Category
+    from app.models.donation import Donation
+    from app.models.donation import DonationRequest  # Assuming this model exists
+    # from app import models
+   # DEBUG: Use inspect to check registered models
+
+    # DEBUG: Print registered models (for confirmation)
+    print("Registered Models:")
+    print(User.__name__)  # Just an example for the User model
+    print(NGOProfile.__name__)
+    print(DonorProfile.__name__)
 
     return app

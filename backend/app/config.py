@@ -7,7 +7,7 @@
 #     # Database configuration
 #     # Replace with your PostgreSQL connection string
 #     # Example: postgresql://your_app_user:your_strong_password@localhost:5432/charity_db
-#     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'postgresql://arnold:arnold123@localhost:5432/charity_db')
+#     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'DATABASE_URL=postgresql://arnold:arnold123@localhost:5432/charity_db')
 #     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 #     # JWT configuration
