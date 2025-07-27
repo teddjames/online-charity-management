@@ -8,3 +8,4 @@ Flask-Migrate==4.0.0
 marshmallow==3.21.0
 cloudinary==1.38.0
 gunicorn==22.0.0 
+Flask-CORS
