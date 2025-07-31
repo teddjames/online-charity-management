@@ -65,18 +65,27 @@ def update_category(category_id):
     category = Category.query.get(category_id)
     if not category:
         return jsonify({"message": "Category not found"}), 404
+
     data = request.get_json()
     if not data:
         return jsonify({"message": "Invalid JSON"}), 400
+
     try:
-        updated_category_data = category_schema.load(data, instance=category, partial=True)
-        for key, value in updated_category_data.items():
+        # Validate input without 'instance'
+        validated_data = category_schema.load(data, partial=True)
+
+        # Manually update fields on the model
+        for key, value in validated_data.items():
             setattr(category, key, value)
+
     except Exception as e:
         return jsonify({"message": "Validation error", "errors": str(e)}), 400
+
+    # Unique name constraint check
     if 'name' in data and data['name'] != category.name:
         if Category.query.filter(Category.name == data['name'], Category.id != category_id).first():
             return jsonify({"message": f"Category with name '{data['name']}' already exists"}), 409
+
     try:
         db.session.commit()
         return jsonify(category_schema.dump(category)), 200
