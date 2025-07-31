@@ -49,9 +49,12 @@ def create_app():
 
     # DEBUG: Print registered models (for confirmation)
     print("Registered Models:")
-    print(User.__name__)  # Just an example for the User model
+    print(User.__name__)
     print(NGOProfile.__name__)
     print(DonorProfile.__name__)
+    print(Category.__name__) # Added Category
+    print(Donation.__name__) # Added Donation
+    print(DonationRequest.__name__) # Added DonationRequest
 
     # # --- ADD THIS HEALTH CHECK ENDPOINT ---
     # @app.route('/health', methods=['GET'])
