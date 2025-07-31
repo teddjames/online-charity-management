@@ -23,7 +23,15 @@ class NGOProfile(db.Model):
 
     # Relationship to individual DonationRequest records
     # Add overlaps to resolve SAWarning
-    donation_requests = db.relationship('DonationRequest', backref='ngo_obj', lazy=True, cascade="all, delete-orphan", overlaps="ngo_obj,ngo")
+    # donation_requests = db.relationship('DonationRequest', backref='ngo_obj', lazy=True, cascade="all, delete-orphan", overlaps="ngo_obj,ngo")
+    donation_requests = db.relationship(
+    'DonationRequest',
+    back_populates='ngo',
+    lazy=True,
+    cascade="all, delete-orphan"
+)
+
+    
 
     def __repr__(self):
         return f'<NGOProfile {self.organization_name}>'
