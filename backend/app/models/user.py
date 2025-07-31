@@ -14,7 +14,7 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
     role = db.Column(db.String(20), nullable=False, default='Donor') # 'Admin', 'NGO', 'Donor'
-    is_approved = db.Column(db.Boolean, default=False) # For NGO approval by Admin
+    is_approved = db.Column(db.Boolean, default=True) # For NGO approval by Admin
     two_fa_secret = db.Column(db.String(32), nullable=True) # For 2-Step Authentication
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
