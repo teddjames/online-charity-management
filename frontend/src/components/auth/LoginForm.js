@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Heart, Mail, Lock } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import api from '../../api/axios'; // Import the centralized API instance
+import api from '../../api/axios';
+import { useAuth } from '../../context/AuthContext'; // Import the useAuth hook
 
 // Main Login Page Component
 export default function LoginPage() {
@@ -12,6 +13,7 @@ export default function LoginPage() {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    const { login } = useAuth(); // Get the login function from context
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -29,29 +31,19 @@ export default function LoginPage() {
         try {
             const response = await api.post('/auth/login', formData);
             
-            // Assuming the token is in response.data.access_token
-            const { access_token, role } = response.data;
+            const { access_token } = response.data;
 
-            // Store the token (e.g., in localStorage or Redux store)
-            localStorage.setItem('token', access_token);
+            // Use the login function from context to update the global state
+            login(access_token);
             
-            alert('Login successful!');
-
-            // Redirect user based on their role
-            if (role === 'Admin') {
-                navigate('/dashboard/admin');
-            } else if (role === 'NGO') {
-                navigate('/dashboard/ngo');
-            } else {
-                navigate('/dashboard/donor');
-            }
+            // Redirect to the homepage after successful login
+            navigate('/');
 
         } catch (err) {
-            // Handle login errors
             if (err.response) {
                 setError(err.response.data.message || 'Login failed. Please check your credentials.');
             } else {
-                setError('Login failed. Please try again later.');
+                setError('Login failed. An unexpected error occurred.');
             }
             console.error('Login error:', err);
         } finally {
@@ -64,16 +56,17 @@ export default function LoginPage() {
 
     return (
         <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 font-sans">
-            <div className="w-full max-w-6xl mx-auto lg:grid lg:grid-cols-2 shadow-2xl rounded-3xl overflow-hidden lg:h-[85vh] lg:max-h-[700px]">
+            <div className="w-full max-w-6xl mx-auto lg:grid lg:grid-cols-2 shadow-2xl rounded-3xl overflow-hidden lg:h-auto lg:max-h-[700px]">
                 <div className="hidden lg:block relative">
+                     {/* Using a reliable placeholder image */}
                      <img 
-                        src="https://cdn.discordapp.com/attachments/1395611202104721448/1397273166983856269/9e502536-7068-4912-80e0-179e62827465.png?ex=68811f8b&is=687fce0b&hm=3446c7c112fd95d83785b85f2bf65760a59c24356acf217954b2c7e7326700e4&" 
+                        src="https://placehold.co/800x700/3b82f6/ffffff?text=Welcome+Back!" 
                         alt="Person logging into the platform securely" 
                         className="w-full h-full object-cover"
                      />
                      <div className="absolute inset-0 flex flex-col items-center justify-center p-12 text-white text-center bg-gradient-to-t from-black/60 to-black/10">
-                        <h2 className="text-4xl font-bold leading-tight">Welcome Back to the Community.</h2>
-                        <p className="mt-4 text-lg text-blue-100/80 max-w-sm">Your continued support fuels our mission and brings hope to many.</p>
+                         <h2 className="text-4xl font-bold leading-tight">Welcome Back to the Community.</h2>
+                         <p className="mt-4 text-lg text-blue-100/80 max-w-sm">Your continued support fuels our mission and brings hope to many.</p>
                      </div>
                 </div>
                 <div className="bg-white p-8 sm:p-12 flex flex-col justify-center">

@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Heart, User, Building, Mail, Lock } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
-import api from '../../api/axios'; // Make sure this import path is correct
 
-// Main Sign Up Page Component
 export default function SignupPage() {
-    const [userType, setUserType] = useState('donor'); // 'donor' or 'ngo'
+    const [userType, setUserType] = useState('donor');
     const [formData, setFormData] = useState({
         username: '',
         email: '',
@@ -26,10 +24,12 @@ export default function SignupPage() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
         if (formData.password !== formData.confirmPassword) {
             setError("Passwords do not match!");
             return;
         }
+
         setLoading(true);
         setError('');
 
@@ -41,18 +41,28 @@ export default function SignupPage() {
                 role: userType === 'donor' ? 'Donor' : 'NGO'
             };
 
-            // This line uses the 'api' object, which has the correct base URL
-            await api.post('/auth/register', payload);
+            // Updated API URL for local development
+            const apiUrl = 'http://127.0.0.1:5000/api';
+
+            const response = await fetch(`${apiUrl}/auth/register`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Registration failed.');
+            }
             
-            alert('Registration successful! Please log in.');
+            // On success, redirect to the login page
             navigate('/login');
 
         } catch (err) {
-            if (err.response) {
-                setError(err.response.data.message || 'Registration failed. Please try again.');
-            } else {
-                setError('Registration failed. An unexpected error occurred.');
-            }
+            setError(err.message || 'Registration failed. An unexpected error occurred.');
             console.error('Registration error:', err);
         } finally {
             setLoading(false);
@@ -64,8 +74,7 @@ export default function SignupPage() {
 
     return (
         <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 font-sans">
-            <div className="w-full max-w-6xl mx-auto lg:grid lg:grid-cols-2 shadow-2xl rounded-3xl overflow-hidden lg:h-[85vh] lg:max-h-[700px]">
-                {/* Form Section */}
+            <div className="w-full max-w-6xl mx-auto lg:grid lg:grid-cols-2 shadow-2xl rounded-3xl overflow-hidden lg:h-auto lg:max-h-[750px]">
                 <div className="bg-white p-8 sm:p-12 flex flex-col justify-center">
                     <div className="w-full max-w-md mx-auto">
                         <div className="text-center mb-8">
@@ -88,6 +97,7 @@ export default function SignupPage() {
 
                         <form onSubmit={handleSubmit} className="space-y-6">
                             {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative" role="alert">{error}</div>}
+                            
                             <div className="relative">
                                 {userType === 'donor' ? <User className={iconClass} /> : <Building className={iconClass} />}
                                 <input type="text" name="username" placeholder={userType === 'donor' ? 'Username' : 'Organization Name'} value={formData.username} onChange={handleInputChange} className={inputClass} required />
@@ -105,7 +115,7 @@ export default function SignupPage() {
                                 <input type="password" name="confirmPassword" placeholder="Confirm Password" value={formData.confirmPassword} onChange={handleInputChange} className={inputClass} required />
                             </div>
                             <div>
-                                <button type="submit" disabled={loading} className="w-full bg-blue-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-600 transition-colors duration-300 shadow-lg disabled:bg-blue-300">
+                                <button type="submit" disabled={loading} className="w-full bg-blue-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-600 transition-colors duration-300 shadow-lg disabled:bg-blue-300 disabled:cursor-not-allowed">
                                     {loading ? 'Creating Account...' : 'Create Account'}
                                 </button>
                             </div>
@@ -113,21 +123,21 @@ export default function SignupPage() {
 
                         <p className="text-center text-sm text-gray-500 mt-8">
                             Already have an account?{' '}
-                            <Link to="/login" className="font-semibold text-blue-500 hover:underline">Log In</Link>
+                            <a href="/login" className="font-semibold text-blue-500 hover:underline">Log In</a>
                         </p>
                     </div>
                 </div>
 
-                {/* Image Section */}
                 <div className="hidden lg:block relative">
                      <img 
                         src="https://res.cloudinary.com/drurumfi8/image/upload/v1753340675/signup_lyjj37.png" 
                         alt="Community of people smiling" 
                         className="w-full h-full object-cover"
+                        onError={(e) => { e.target.onerror = null; e.target.src='https://placehold.co/800x700/3b82f6/ffffff?text=Welcome!'; }}
                      />
-                     <div className="absolute inset-0 flex flex-col items-center justify-center p-12 text-white text-center bg-gradient-to-t from-black/50 to-transparent">
-                        <h2 className="text-4xl font-bold leading-tight">Start Your Journey of Giving Today.</h2>
-                        <p className="mt-4 text-lg text-blue-100/90 max-w-sm">Be the reason for someone's smile. Your support creates ripples of change.</p>
+                     <div className="absolute inset-0 flex flex-col items-center justify-center p-12 text-white text-center bg-gradient-to-t from-black/60 to-transparent">
+                         <h2 className="text-4xl font-bold leading-tight">Start Your Journey of Giving Today.</h2>
+                         <p className="mt-4 text-lg text-blue-100/90 max-w-sm">Be the reason for someone's smile. Your support creates ripples of change.</p>
                      </div>
                 </div>
             </div>

@@ -1,35 +1,42 @@
 import React from 'react';
-import { User, Mail, Phone, Edit, Shield } from 'lucide-react';
-
-// Mock user data - in a real app, this would come from your state management (Redux)
-const userData = {
-    name: 'Jane Doe',
-    email: 'jane.doe@example.com',
-    role: 'Donor', // Could be 'Donor' or 'NGO'
-    avatarUrl: 'https://placehold.co/400x400/EBF8FF/3182CE?text=JD',
-    profile: {
-        firstName: 'Jane',
-        lastName: 'Doe',
-        phoneNumber: '+254 712 345 678',
-        address: '123 Charity Lane, Nairobi, Kenya'
-    }
-};
+import { User, Mail, Phone, Edit } from 'lucide-react';
+import { useAuth } from '../context/AuthContext'; // Import useAuth
 
 const ProfileField = ({ icon, label, value }) => (
     <div>
         <label className="block text-sm font-medium text-gray-500">{label}</label>
         <div className="mt-1 flex items-center">
             <div className="text-gray-400 mr-3">{icon}</div>
-            <p className="text-md text-gray-800">{value}</p>
+            <p className="text-md text-gray-800">{value || 'Not set'}</p>
         </div>
     </div>
 );
 
-// Changed from 'export default' to a named 'export'
 export function ProfileDashboard() {
+    const { user } = useAuth(); // Get user from context
+
+    if (!user) {
+        return (
+            <div className="text-center p-12">Loading profile...</div>
+        );
+    }
+
+    // Use placeholder data if specific details aren't in the JWT
+    const profileData = {
+        name: user.username,
+        email: user.email || 'No email provided', // Assuming email might be in your token
+        role: user.role,
+        avatarUrl: `https://placehold.co/400x400/EBF8FF/3182CE?text=${user.username.charAt(0).toUpperCase()}`,
+        profile: {
+            firstName: user.username.split(' ')[0],
+            lastName: user.username.split(' ').slice(1).join(' ') || '',
+            phoneNumber: '+254 712 345 678', // Placeholder
+            address: '123 Charity Lane, Nairobi, Kenya' // Placeholder
+        }
+    };
+
     return (
         <div className="bg-slate-50 font-sans min-h-screen">
-            {/* Page Header */}
             <header className="bg-white shadow-sm">
                 <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     <h1 className="text-3xl font-bold tracking-tight text-gray-900">
@@ -41,7 +48,6 @@ export function ProfileDashboard() {
                 </div>
             </header>
 
-            {/* Main Content */}
             <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div className="max-w-4xl mx-auto">
                     <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
@@ -50,14 +56,14 @@ export function ProfileDashboard() {
                                 <div className="flex-shrink-0">
                                     <img
                                         className="w-32 h-32 rounded-full border-4 border-blue-200 object-cover"
-                                        src={userData.avatarUrl}
-                                        alt={userData.name}
+                                        src={profileData.avatarUrl}
+                                        alt={profileData.name}
                                     />
                                 </div>
                                 <div className="flex-grow text-center md:text-left">
-                                    <h2 className="text-3xl font-bold text-gray-800">{userData.name}</h2>
-                                    <p className="text-blue-600 font-semibold">{userData.role}</p>
-                                    <p className="text-gray-500 mt-1">{userData.email}</p>
+                                    <h2 className="text-3xl font-bold text-gray-800">{profileData.name}</h2>
+                                    <p className="text-blue-600 font-semibold">{profileData.role}</p>
+                                    <p className="text-gray-500 mt-1">{profileData.email}</p>
                                     <button className="mt-4 inline-flex items-center gap-2 bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors text-sm">
                                         <Edit size={16} />
                                         Edit Profile
@@ -69,31 +75,10 @@ export function ProfileDashboard() {
                         <div className="border-t border-gray-200 px-8 py-6">
                             <h3 className="text-xl font-bold text-gray-900 mb-6">Personal Information</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                                <ProfileField icon={<User size={20} />} label="First Name" value={userData.profile.firstName} />
-                                <ProfileField icon={<User size={20} />} label="Last Name" value={userData.profile.lastName} />
-                                <ProfileField icon={<Mail size={20} />} label="Email Address" value={userData.email} />
-                                <ProfileField icon={<Phone size={20} />} label="Phone Number" value={userData.profile.phoneNumber} />
+                                <ProfileField icon={<User size={20} />} label="Username" value={profileData.name} />
+                                <ProfileField icon={<Mail size={20} />} label="Email Address" value={profileData.email} />
+                                <ProfileField icon={<Phone size={20} />} label="Phone Number" value={profileData.profile.phoneNumber} />
                             </div>
-                        </div>
-
-                        <div className="border-t border-gray-200 px-8 py-6">
-                             <h3 className="text-xl font-bold text-gray-900 mb-6">Security</h3>
-                             <div className="space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <h4 className="font-semibold text-gray-800">Change Password</h4>
-                                        <p className="text-sm text-gray-500">It's a good idea to use a strong password that you're not using elsewhere.</p>
-                                    </div>
-                                    <button className="text-sm font-semibold text-blue-600 hover:underline">Change</button>
-                                </div>
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <h4 className="font-semibold text-gray-800">Two-Factor Authentication</h4>
-                                        <p className="text-sm text-gray-500">Add an extra layer of security to your account.</p>
-                                    </div>
-                                    <button className="text-sm font-semibold text-blue-600 hover:underline">Enable</button>
-                                </div>
-                             </div>
                         </div>
                     </div>
                 </div>

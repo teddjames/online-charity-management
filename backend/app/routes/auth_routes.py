@@ -1,101 +1,87 @@
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
-from app.extensions import db,jwt
 from app.models.user import User
-from datetime import timedelta
+from app.models.donor import DonorProfile
+from app.models.ngo import NGOProfile
+from app.extensions import db
+from flask_jwt_extended import create_access_token
 
-#create a blueprint for Authentication routes
-auth_bp= Blueprint('auth_bp', __name__, url_prefix='/api/auth')
+auth_bp = Blueprint('auth_bp', __name__, url_prefix='/api/auth')
 
 @auth_bp.route('/register', methods=['POST'])
 def register():
-    """
-    Registers a new user.
-    Expects JSON data with 'username', 'email', 'password', and 'role'.
-    Role can be 'Donor', 'NGO', or 'Admin'.
-    """
     data = request.get_json()
-    print("Received register payload:", data) 
-    if not data:
-        return jsonify({"message": "Invalid JSON"}), 400
-
     username = data.get('username')
     email = data.get('email')
     password = data.get('password')
-    role = data.get('role', 'Donor') # Default role is 'Donor'
+    role = data.get('role', 'Donor')
 
-    # Basic input validation
     if not all([username, email, password]):
-        return jsonify({"message": "Missing username, email, or password"}), 400
+        return jsonify({"message": "Missing required fields"}), 400
 
-    if role not in ['Donor', 'NGO', 'Admin']:
-        return jsonify({"message": "Invalid role specified"}), 400
-
-    # Check if user already exists
-    if User.query.filter_by(username=username).first():
-        return jsonify({"message": "Username already exists"}), 409
     if User.query.filter_by(email=email).first():
-        return jsonify({"message": "Email already exists"}), 409
+        return jsonify({"message": "Email already registered"}), 409
+    
+    if User.query.filter_by(username=username).first():
+        return jsonify({"message": "Username already taken"}), 409
 
-    # Create new user
     new_user = User(username=username, email=email, role=role)
-    new_user.set_password(password) # Hash the password
-
-    # NGOs need to be approved by an admin
+    new_user.set_password(password)
+    
     if role == 'NGO':
         new_user.is_approved = False
-    elif role == 'Admin':
-        # For initial setup, allow admin registration.
-        # In a real app, admin creation might be a separate, more restricted process.
-        new_user.is_approved = True # Admins are self-approved
-    else: # Donor
-        new_user.is_approved = True # Donors are self-approved
+    else:
+        new_user.is_approved = True
+
+    db.session.add(new_user)
+    db.session.flush() 
 
     try:
-        db.session.add(new_user)
+        if role == 'Donor':
+            donor_profile = DonorProfile(
+                user_id=new_user.id,
+                first_name=username,
+                last_name="" 
+            )
+            db.session.add(donor_profile)
+        elif role == 'NGO':
+            # FIX: Provide default values for required NGO fields
+            ngo_profile = NGOProfile(
+                user_id=new_user.id,
+                organization_name=username,
+                contact_person=username, # Use username as a default
+                phone_number="",        # Provide empty string
+                address=""              # Provide empty string
+            )
+            db.session.add(ngo_profile)
+        
         db.session.commit()
-        return jsonify({"message": f"User {username} registered successfully. Role: {role}. Approval status: {'Pending' if not new_user.is_approved else 'Approved'}"}), 201
+        return jsonify({"message": "User registered successfully"}), 201
     except Exception as e:
         db.session.rollback()
-        return jsonify({"message": "An error occurred during registration", "error": str(e)}), 500
+        print(f"Error during profile creation: {e}") 
+        return jsonify({"message": "An error occurred during profile creation."}), 500
+
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
-    """
-    Logs in a user and returns a JWT access token.
-    Expects JSON data with 'email' and 'password'.
-    """
     data = request.get_json()
-    if not data:
-        return jsonify({"message": "Invalid JSON"}), 400
-
     email = data.get('email')
     password = data.get('password')
 
-    if not all([email, password]):
-        return jsonify({"message": "Missing email or password"}), 400
-
     user = User.query.filter_by(email=email).first()
 
-    if not user or not user.check_password(password):
-        return jsonify({"message": "Invalid email or password"}), 401
+    if user and user.check_password(password):
+        if user.role == 'NGO' and not user.is_approved:
+            return jsonify({"message": "Your NGO account is pending admin approval."}), 403
 
-    # Check if NGO is approved before allowing login
-    if user.role == 'NGO' and not user.is_approved:
-        return jsonify({"message": "Your NGO account is pending admin approval."}), 403
+        additional_claims = {
+            "role": user.role,
+            "username": user.username 
+        }
+        access_token = create_access_token(
+            identity={"id": user.id}, 
+            additional_claims=additional_claims
+        )
+        return jsonify(access_token=access_token, role=user.role)
 
-    # Create an access token
-    # The identity can be any data that is used to identify the user
-    # in subsequent requests (e.g., user ID, email)
-    access_token = create_access_token(identity={'id': user.id, 'role': user.role}, expires_delta=timedelta(hours=1))
-    return jsonify(access_token=access_token, user_id=user.id, role=user.role), 200
-
-@auth_bp.route('/protected', methods=['GET'])
-@jwt_required() # This decorator protects the route
-def protected():
-    """
-    A protected route to test JWT authentication.
-    Requires a valid JWT in the Authorization header.
-    """
-    current_user_identity = get_jwt_identity() # Get the identity from the JWT
-    return jsonify(logged_in_as=current_user_identity), 200
+    return jsonify({"message": "Invalid credentials"}), 401
