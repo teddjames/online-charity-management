@@ -3,8 +3,7 @@ from dotenv import load_dotenv
 import os
 import marshmallow
 from sqlalchemy import inspect
-from flask_cors import CORS  # 1. IMPORT THIS
-
+from flask_cors import CORS
 # Load environment variables from .env file
 load_dotenv()
 
@@ -18,9 +17,6 @@ def create_app():
     """
     app = Flask(__name__)
     app.config.from_object(Config)
-
-    # 2. INITIALIZE CORS HERE
-    CORS(app)
 
     # Initialize extensions with the app
     db.init_app(app)
@@ -42,21 +38,38 @@ def create_app():
     app.register_blueprint(ngo_bp)
     app.register_blueprint(donor_bp) 
 
+    # Enable CORS for the app
+    CORS(app)
+
     from app.models import user, ngo, donor, cause, donation
     from app.models.user import User
     from app.models.ngo import NGOProfile
     from app.models.donor import DonorProfile
     from app.models.cause import Category
     from app.models.donation import Donation
-    from app.models.donation import DonationRequest
+    from app.models.donation import DonationRequest  # Assuming this model exists
+    # from app import models
+   # DEBUG: Use inspect to check registered models
 
+    # DEBUG: Print registered models (for confirmation)
     print("Registered Models:")
     print(User.__name__)
     print(NGOProfile.__name__)
     print(DonorProfile.__name__)
+    print(Category.__name__) # Added Category
+    print(Donation.__name__) # Added Donation
+    print(DonationRequest.__name__) # Added DonationRequest
 
+    # # --- ADD THIS HEALTH CHECK ENDPOINT ---
+    # @app.route('/health', methods=['GET'])
+    # def health_check():
+    #     return jsonify({"status": "ok", "message": "Service is healthy!"}), 200
+    # # --- END OF HEALTH CHECK ENDPOINT ---
+        # --- ADD THIS HEALTH CHECK ENDPOINT ---
     @app.route('/health', methods=['GET'])
     def health_check():
         return jsonify({"status": "ok", "message": "Service is healthy!"}), 200
+    # --- END OF HEALTH CHECK ENDPOINT ---
+
 
     return app

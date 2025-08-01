@@ -1,7 +1,10 @@
 import axios from 'axios';
 
-// The base URL of your deployed backend on Render
-const API_BASE_URL = 'https://plsfundme-backend.onrender.com/api';
+// The base URL for your LOCAL backend server
+const API_BASE_URL = 'http://127.0.0.1:5000/api';
+
+// The base URL for your DEPLOYED backend on Render
+// const API_BASE_URL = 'https://plsfundme-backend.onrender.com/api';
 
 // Create an Axios instance with the base URL
 const api = axios.create({
@@ -9,15 +12,14 @@ const api = axios.create({
 });
 
 /*
-  This setup allows you to make requests without typing the full URL every time.
+  This setup allows you to make requests to your local server.
   For example, to log in, you can now use:
   api.post('/auth/login', { email, password });
 
   The request will automatically go to:
-  https://plsfundme-backend.onrender.com/api/auth/login
+  http://127.0.0.1:5000/api/auth/login
 */
 
-// You can also add interceptors here to automatically attach the JWT token
-// to every authenticated request, which is a very common pattern.
+// IMPORTANT: Remember to switch back to the Render URL before you deploy your frontend.
 
 export default api;

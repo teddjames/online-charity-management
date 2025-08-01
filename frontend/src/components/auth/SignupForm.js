@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Heart, User, Building, Mail, Lock } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import api from '../../api/axios'; // Import the centralized API instance
+import api from '../../api/axios'; // Make sure this import path is correct
 
 // Main Sign Up Page Component
 export default function SignupPage() {
@@ -41,6 +41,7 @@ export default function SignupPage() {
                 role: userType === 'donor' ? 'Donor' : 'NGO'
             };
 
+            // This line uses the 'api' object, which has the correct base URL
             await api.post('/auth/register', payload);
             
             alert('Registration successful! Please log in.');
