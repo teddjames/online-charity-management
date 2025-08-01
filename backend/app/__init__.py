@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 import os
 import marshmallow
 from sqlalchemy import inspect
+from flask_cors import CORS
 # Load environment variables from .env file
 load_dotenv()
 
@@ -36,6 +37,9 @@ def create_app():
     app.register_blueprint(admin_bp)
     app.register_blueprint(ngo_bp)
     app.register_blueprint(donor_bp) 
+
+    # Enable CORS for the app
+    CORS(app)
 
     from app.models import user, ngo, donor, cause, donation
     from app.models.user import User
