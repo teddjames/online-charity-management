@@ -15,6 +15,7 @@ def register():
     Role can be 'Donor', 'NGO', or 'Admin'.
     """
     data = request.get_json()
+    print("Received register payload:", data) 
     if not data:
         return jsonify({"message": "Invalid JSON"}), 400
 
