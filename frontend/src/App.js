@@ -4,8 +4,9 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 // Page components
 import HomePage from "./pages/Home";
 import CausesPage from "./pages/Causes";
-import AboutUsPage from "./pages/About";
+import AboutUsPage from "./pages/About"; // Corrected path
 import ContactPage from "./pages/Contact";
+import { ProfileDashboard } from './pages/ProfileDashboard'; 
 
 // Auth components
 import LoginPage from "./components/auth/LoginForm";
@@ -15,7 +16,7 @@ import PrivateRoute from "./components/auth/PrivateRoute";
 // Dashboard components
 import DonorDashboard from "./components/dashboard/DonorDashboard";
 import NgoDashboard from "./components/dashboard/NgoDashboard";
-// import AdminDashboard from './components/dashboard/AdminDashboard'; // Uncomment if you have it
+import AdminDashboard from './components/dashboard/AdminDashboard'; // Added AdminDashboard
 
 // Common components
 import Navbar from "./components/common/Navbar";
@@ -38,22 +39,13 @@ function App() {
             <Route path="/about" element={<AboutUsPage />} />
             <Route path="/contact" element={<ContactPage />} />
 
-            {/* Dashboards */}
-            <Route path="/dashboard/donor" element={<DonorDashboard />} />
-            <Route path="/dashboard/ngo" element={<NgoDashboard />} />
-            {/* <Route path="/dashboard/admin" element={<AdminDashboard />} /> */}
-
-            {/* Protected donation route */}
-            <Route
-              path="/donate/:id"
-              element={
-                <PrivateRoute>
-                  <DonationForm />
-                </PrivateRoute>
-              }
-            />
-
-            {/* You can add a NotFoundPage later for unmatched routes */}
+            {/* Protected Routes */}
+            <Route path="/profile" element={<PrivateRoute><ProfileDashboard /></PrivateRoute>} />
+            <Route path="/dashboard/donor" element={<PrivateRoute><DonorDashboard /></PrivateRoute>} />
+            <Route path="/dashboard/ngo" element={<PrivateRoute><NgoDashboard /></PrivateRoute>} />
+            <Route path="/dashboard/admin" element={<PrivateRoute><AdminDashboard /></PrivateRoute>} />
+            <Route path="/donate/:id" element={<PrivateRoute><DonationForm /></PrivateRoute>} />
+            
           </Routes>
         </main>
         <Footer />

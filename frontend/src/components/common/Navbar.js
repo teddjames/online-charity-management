@@ -1,10 +1,13 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Heart } from 'lucide-react';
+import { Link, NavLink } from 'react-router-dom';
+import { Heart, User } from 'lucide-react';
 
 const Navbar = () => {
-  // In a real app, you'd check auth state to show/hide links
-  const isLoggedIn = false; 
+  // In a real app, you'd check auth state from Redux/Context to show/hide links
+  const isLoggedIn = true; 
+
+  const linkClass = "text-gray-500 hover:bg-blue-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors";
+  const activeLinkClass = "bg-blue-100 text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors";
 
   return (
     <nav className="bg-white/80 backdrop-blur-lg sticky top-0 z-50 border-b border-gray-200/80">
@@ -18,15 +21,20 @@ const Navbar = () => {
           </div>
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-4">
-              <Link to="/" className="text-gray-700 hover:bg-blue-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Home</Link>
-              <Link to="/Causes" className="text-gray-500 hover:bg-blue-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Causes</Link>
-              <Link to="/about" className="text-gray-500 hover:bg-blue-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">About Us</Link>
-              <Link to="/contact" className="text-gray-500 hover:bg-blue-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Contact</Link>
+              <NavLink to="/" className={({isActive}) => isActive ? activeLinkClass : linkClass}>Home</NavLink>
+              <NavLink to="/causes" className={({isActive}) => isActive ? activeLinkClass : linkClass}>Causes</NavLink>
+              <NavLink to="/about" className={({isActive}) => isActive ? activeLinkClass : linkClass}>About Us</NavLink>
+              <NavLink to="/contact" className={({isActive}) => isActive ? activeLinkClass : linkClass}>Contact</NavLink>
             </div>
           </div>
           <div className="flex items-center">
             {isLoggedIn ? (
-              <Link to="/dashboard/donor" className="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-600 transition-colors shadow-md">Dashboard</Link>
+              <div className="flex items-center space-x-4">
+                <Link to="/dashboard/donor" className="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-600 transition-colors shadow-md">Dashboard</Link>
+                <Link to="/profile" className="p-2 rounded-full text-gray-500 hover:bg-gray-100 hover:text-blue-500 transition-colors">
+                  <User size={22} />
+                </Link>
+              </div>
             ) : (
               <>
                 <Link to="/login" className="text-gray-600 hover:text-blue-500 px-4 py-2 rounded-md text-sm font-medium">Log In</Link>
