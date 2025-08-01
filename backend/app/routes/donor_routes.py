@@ -1,12 +1,12 @@
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt
 from app.extensions import db
-from app.models.user import User
 from app.models.donor import DonorProfile
-from app.models.donation import DonationRequest, Donation # Import both models
-from app.models.cause import Category # To filter by category name
-from app.schemas.donation_schema import DonationRequestSchema, DonationSchema # Import both schemas
+from app.models.donation import DonationRequest, Donation
+from app.models.cause import Category
+from app.schemas.donation_schema import DonationRequestSchema, DonationSchema
 from app.utils.decorators import donor_required
+from decimal import Decimal
 
 donor_bp = Blueprint('donor_bp', __name__, url_prefix='/api/donors')
 
@@ -25,7 +25,6 @@ def get_approved_donation_requests():
     Supports filtering by category name.
     """
     category_name = request.args.get('category')
-
     query = DonationRequest.query.filter_by(status='Approved')
 
     if category_name:
@@ -48,7 +47,6 @@ def get_single_approved_donation_request(request_id):
     donation_request = DonationRequest.query.filter_by(id=request_id, status='Approved').first()
     if not donation_request:
         return jsonify({"message": "Approved donation request not found"}), 404
-
     return jsonify(donation_request_schema.dump(donation_request)), 200
 
 @donor_bp.route('/donate/<request_id>', methods=['POST'])
@@ -57,10 +55,9 @@ def get_single_approved_donation_request(request_id):
 def make_donation(request_id):
     """
     Allows a donor to make a donation to an approved request.
-    Expects JSON data with 'amount_donated'.
     """
-    current_user_identity = get_jwt_identity()
-    user_id = current_user_identity['id']
+    claims = get_jwt()
+    user_id = claims.get('sub', {}).get('id')
 
     donor_profile = DonorProfile.query.filter_by(user_id=user_id).first()
     if not donor_profile:
@@ -75,31 +72,22 @@ def make_donation(request_id):
         return jsonify({"message": "Invalid JSON"}), 400
 
     try:
-        # Validate input data for the donation amount
-        # We're manually validating here as we only need 'amount_donated'
-        amount_donated = float(data.get('amount_donated'))
-        if not isinstance(amount_donated, (int, float)) or amount_donated <= 0:
+        amount_donated = Decimal(data.get('amount_donated'))
+        if amount_donated <= 0:
             return jsonify({"message": "Amount donated must be a positive number"}), 400
         if amount_donated > (donation_request.amount_needed - donation_request.amount_received):
             return jsonify({"message": "Donation amount exceeds remaining amount needed"}), 400
-
     except (ValueError, TypeError):
         return jsonify({"message": "Invalid amount_donated format"}), 400
-    except Exception as e:
-        return jsonify({"message": "Validation error", "errors": str(e)}), 400
 
-    # Create the individual donation record
     new_donation = Donation(
         donor_id=donor_profile.id,
         donation_request_id=donation_request.id,
         amount_donated=amount_donated
-        # transaction_id can be added here once payment gateway is integrated
     )
 
-    # Update the amount_received on the DonationRequest
     donation_request.amount_received += amount_donated
 
-    # If the request is fully funded, mark it as 'Completed'
     if donation_request.amount_received >= donation_request.amount_needed:
         donation_request.status = 'Completed'
 
@@ -118,8 +106,8 @@ def get_my_donations():
     """
     Retrieves the donation history for the authenticated donor.
     """
-    current_user_identity = get_jwt_identity()
-    user_id = current_user_identity['id']
+    claims = get_jwt()
+    user_id = claims.get('sub', {}).get('id')
 
     donor_profile = DonorProfile.query.filter_by(user_id=user_id).first()
     if not donor_profile:
