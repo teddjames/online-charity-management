@@ -1,8 +1,7 @@
 import axios from 'axios';
 
-// Use the production URL from environment variables,
-// but fall back to the local URL for development.
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:5000/api';
+// This now points directly to your live backend on Render.
+const API_BASE_URL = 'https://online-charity-management-tpy8.onrender.com/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
