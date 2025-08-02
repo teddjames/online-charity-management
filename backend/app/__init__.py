@@ -21,6 +21,7 @@ def create_app():
     origins = [
         "http://localhost:3000",
         "http://127.0.0.1:3000",
+        "https://online-charity-frontend.onrender.com" # Add your live URL here,
     ]
     CORS(app, resources={r"/api/*": {"origins": origins}}, supports_credentials=True)
     # --- END OF CORS CONFIGURATION ---
