@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Heart, User, Building, Mail, Lock } from 'lucide-react';
+import api from '../../api/axios'; // 1. Import the centralized api instance
 
 export default function SignupPage() {
     const [userType, setUserType] = useState('donor');
@@ -41,28 +42,18 @@ export default function SignupPage() {
                 role: userType === 'donor' ? 'Donor' : 'NGO'
             };
 
-            // Updated API URL for local development
-            const apiUrl = 'http://127.0.0.1:5000/api';
-
-            const response = await fetch(`${apiUrl}/auth/register`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(payload),
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Registration failed.');
-            }
+            // 2. Use the api instance instead of fetch
+            await api.post('/auth/register', payload);
             
             // On success, redirect to the login page
             navigate('/login');
 
         } catch (err) {
-            setError(err.message || 'Registration failed. An unexpected error occurred.');
+            if (err.response) {
+                setError(err.response.data.message || 'Registration failed. Please try again.');
+            } else {
+                setError('Registration failed. An unexpected error occurred.');
+            }
             console.error('Registration error:', err);
         } finally {
             setLoading(false);
@@ -123,17 +114,16 @@ export default function SignupPage() {
 
                         <p className="text-center text-sm text-gray-500 mt-8">
                             Already have an account?{' '}
-                            <a href="/login" className="font-semibold text-blue-500 hover:underline">Log In</a>
+                            <Link to="/login" className="font-semibold text-blue-500 hover:underline">Log In</Link>
                         </p>
                     </div>
                 </div>
 
                 <div className="hidden lg:block relative">
                      <img 
-                        src="https://res.cloudinary.com/drurumfi8/image/upload/v1753340675/signup_lyjj37.png" 
+                        src="https://placehold.co/800x700/3b82f6/ffffff?text=Welcome!" 
                         alt="Community of people smiling" 
                         className="w-full h-full object-cover"
-                        onError={(e) => { e.target.onerror = null; e.target.src='https://placehold.co/800x700/3b82f6/ffffff?text=Welcome!'; }}
                      />
                      <div className="absolute inset-0 flex flex-col items-center justify-center p-12 text-white text-center bg-gradient-to-t from-black/60 to-transparent">
                          <h2 className="text-4xl font-bold leading-tight">Start Your Journey of Giving Today.</h2>
